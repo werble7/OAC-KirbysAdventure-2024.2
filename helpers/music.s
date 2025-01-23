@@ -1,7 +1,4 @@
 .data
-# Número total de notas na música
-NUM: .word 64  # Atualize este valor conforme a quantidade total de notas
-
 # Sequência completa de notas (nota MIDI, duração em ms)
 NOTAS: 
     # Introdução
@@ -15,27 +12,26 @@ NOTAS:
     74,400, 76,400, 78,400, 74,800,         
     # Parte 3
     76,200, 78,200, 79,400, 78,400,         
-    76,400, 74,400, 73,800, 71,800,   
-    
-# Timer para pausa entre repetições (em milissegundos)
-PAUSE_TIME: .word 5000  # 5 segundos      
+    76,400, 74,400, 73,800, 71,800,
+
+NUM_NOTAS: .word 64  # Número total de notas na sequência
 
 .text
-.globl _start
-_start:
-    # Inicialização
-    la s0, NUM        # Carrega o endereço do número de notas
+# Definição da função para tocar a música
+tocar_musica:
+    # Carrega o número total de notas
+    la s0, NUM_NOTAS  # Carrega o endereço de NUM_NOTAS
     lw s1, 0(s0)      # Lê o número total de notas
-    la s0, NOTAS      # Carrega o endereço das notas
-    li t0, 0          # Zera o contador de notas
+    la s0, NOTAS      # Carrega o endereço de NOTAS
+    li t0, 0          # Inicializa o contador de notas
     li a2, 40         # Define o instrumento MIDI (40: flauta)
     li a3, 127        # Define o volume máximo
 
 LOOP_PLAY: 
     # Verifica se todas as notas foram tocadas
-    beq t0, s1, END_PLAY  # Se t0 == s1 (fim das notas), vai para END_PLAY
+    beq t0, s1, FIM_PLAY  # Se t0 == s1 (fim das notas), vai para FIM_PLAY
 
-    # Tocar a nota atual
+     # Tocar a nota atual
     lw a0, 0(s0)        # Lê a nota MIDI atual
     lw a1, 4(s0)        # Lê a duração da nota atual
     li a7, 31           # Syscall: Tocar nota
@@ -43,7 +39,7 @@ LOOP_PLAY:
 
     # Pausa após tocar a nota
     mv a0, a1           # Passa a duração para a pausa
-    li a7, 32           # Syscall: Pausa
+    li a7, 32           # Syscall: Pausa (simula uma pausa)
     ecall               # Executa a syscall para pausar
 
     # Avança para a próxima nota
@@ -51,12 +47,11 @@ LOOP_PLAY:
     addi t0, t0, 1      # Incrementa o contador de notas
     j LOOP_PLAY         # Volta ao início do loop para a próxima nota
 
-END_PLAY:
+FIM_PLAY:
     # Pausa entre as repetições
-    la s0, PAUSE_TIME   # Carrega o endereço do tempo de pausa
-    lw a0, 0(s0)        # Lê o tempo de pausa
+    li a0, 5000         # Tempo de pausa (5 segundos)
     li a7, 32           # Syscall: Pausa
     ecall               # Executa a pausa
 
-    # Reinicia o loop principal
-    j _start            # Reinicia o programa para tocar a música novamente
+    # Reinicia o loop para tocar a música novamente
+    j tocar_musica      # Reinicia a execução da música
