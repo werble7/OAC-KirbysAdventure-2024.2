@@ -16,6 +16,13 @@ NOTAS:
 
 NUM_NOTAS: .word 64  # Número total de notas na sequência
 
+###################### PROCEDIMENTO MUSIC #######################
+#	ARGUMENTOS:						#
+#		a0 = endereco status				#
+#		a2 = instrumento				#
+#		a3 = volume					#
+#################################################################
+
 .text
 # Definição da função para tocar a música
 tocar_musica:
